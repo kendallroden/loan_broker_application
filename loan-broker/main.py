@@ -25,8 +25,6 @@ target_riverstone_bank_app_id = os.getenv('DAPR_RIVERSTONE_BANK_APP_ID', '')
 target_riverstone_bank_api_token = os.getenv('DAPR_RIVERSTONE_BANK_API_TOKEN', '')
 app = FastAPI()
 
-wfr = WorkflowRuntime()
-wf_client = DaprWorkflowClient()
 workflow_runtime = WorkflowRuntime()
 workflow_runtime.register_workflow(loan_broker_workflow)
 workflow_runtime.register_activity(union_vault_quote)
@@ -35,8 +33,6 @@ workflow_runtime.register_activity(riverstone_bank_quote)
 workflow_runtime.register_activity(process_results)
 workflow_runtime.register_activity(error_handler)
 workflow_runtime.start()
-
-wfr.start()
 
 
 @app.post('/v1.0/request/credit-bureau')
