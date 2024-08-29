@@ -57,7 +57,7 @@ def riverstone_bank_quote(ctx, work_item: int):
     # request/response
     try:
         result = requests.post(
-            url='%s/v1.0/loan/request' % base_url,
+            url='%s/v1.0/loan/request' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers
@@ -89,7 +89,7 @@ def titanium_trust_quote(ctx, work_item: int):
     # request/response
     try:
         result = requests.post(
-            url='%s/v1.0/loan/request' % base_url,
+            url='%s/v1.0/loan/request' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers
@@ -120,7 +120,7 @@ def union_vault_quote(ctx, work_item: int):
     # request/response
     try:
         result = requests.post(
-            url='%s/v1.0/loan/request' % base_url,
+            url='%s/v1.0/loan/request' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers
