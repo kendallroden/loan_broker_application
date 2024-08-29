@@ -12,15 +12,12 @@ from model.bank_model import LoanRequestModel, Credit
 
 logging.basicConfig(level=logging.INFO)
 
-base_url = os.getenv('DAPR_HTTP_ENDPOINT', 'http://localhost')
+dapr_http_endpoint = os.getenv('DAPR_HTTP_ENDPOINT', 'http://localhost')
+dapr_api_token = os.getenv('DAPR_API_TOKEN', '')
 target_credit_bureau_app_id = os.getenv('DAPR_CREDIT_BUREAU_APP_ID', '')
-target_credit_bureau_api_token = os.getenv('DAPR_CREDIT_BUREAU_API_TOKEN', '')
 target_union_vault_app_id = os.getenv('DAPR_UNION_VAULT_APP_ID', '')
-target_union_vault_api_token = os.getenv('DAPR_UNION_VAULT_API_TOKEN', '')
 target_titanium_trust_app_id = os.getenv('DAPR_TITANIUM_TRUST_APP_ID', '')
-target_titanium_trust_api_token = os.getenv('DAPR_TITANIUM_TRUST_API_TOKEN', '')
 target_riverstone_bank_app_id = os.getenv('DAPR_RIVERSTONE_BANK_APP_ID', '')
-target_riverstone_bank_api_token = os.getenv('DAPR_RIVERSTONE_BANK_API_TOKEN', '')
 
 
 
@@ -55,7 +52,7 @@ def riverstone_bank_quote(ctx, work_item: int):
     credit = Credit(score="500")
     loan_req = LoanRequestModel(amount="4000", term="6", credit=credit)
     # assign package to available delivery guy.
-    headers = {'dapr-app-id': target_riverstone_bank_app_id, 'dapr-api-token': target_riverstone_bank_api_token,
+    headers = {'dapr-app-id': target_riverstone_bank_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
@@ -87,7 +84,7 @@ def titanium_trust_quote(ctx, work_item: int):
     credit = Credit(score="500")
     loan_req = LoanRequestModel(amount="4000", term="6", credit=credit)
     # assign package to available delivery guy.
-    headers = {'dapr-app-id': target_titanium_trust_app_id, 'dapr-api-token': target_titanium_trust_api_token,
+    headers = {'dapr-app-id': target_titanium_trust_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
@@ -118,8 +115,7 @@ def titanium_trust_quote(ctx, work_item: int):
 def union_vault_quote(ctx, work_item: int):
     credit = Credit(score="500")
     loan_req = LoanRequestModel(amount="4000", term="6", credit=credit)
-    # assign package to available delivery guy.
-    headers = {'dapr-app-id': target_union_vault_app_id, 'dapr-api-token': target_union_vault_api_token,
+    headers = {'dapr-app-id': target_union_vault_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
