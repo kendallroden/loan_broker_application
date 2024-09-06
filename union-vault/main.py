@@ -15,15 +15,15 @@ from model.bank_model import LoanRequestModel
 '''
 
 BANK_ID = "union-vault"
-MIN_CREDIT_SCORE = "400"
-MAX_LOAN_AMOUNT = "900000"
-BASE_RATE = "3"
+MIN_CREDIT_SCORE = 400
+MAX_LOAN_AMOUNT = 900000
+BASE_RATE = 3
 
 logging.basicConfig(level=logging.INFO)
 app = FastAPI()
 
 
-def calculate_interest_rate(amount, term, score, history):
+def calculate_interest_rate(amount: int, score: int):
     if amount <= float(MAX_LOAN_AMOUNT) and score >= float(MIN_CREDIT_SCORE):
         return BASE_RATE + random.random() * ((1000 - score) / 100.0)
 
@@ -32,7 +32,7 @@ def calculate_interest_rate(amount, term, score, history):
 def bank_loan_request(loanRequest: LoanRequestModel):
     logging.info(f"Received loan request {loanRequest} for {BANK_ID}")
 
-    rate = calculate_interest_rate(loanRequest.amount, loanRequest.term, loanRequest.score, loanRequest.history)
+    rate = calculate_interest_rate(loanRequest.amount, loanRequest.credit.score, )
 
     if rate:
         quote = {
@@ -40,13 +40,13 @@ def bank_loan_request(loanRequest: LoanRequestModel):
             'bankId': BANK_ID,
 
         }
-        logging.info("loan approved with qoute", quote)
+        logging.info("Union Vault loan approved with qoute", quote)
         return {
             'status': 'APPROVED',
             'quote': quote
         }
     else:
-        logging.info('loan rejected')
+        logging.info('Union Vault Rejected Loan')
         return {
             'status': 'DENIED',
             'message': 'Loan Rejected'

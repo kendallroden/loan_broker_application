@@ -15,24 +15,24 @@ from model.bank_model import LoanRequestModel
 '''
 
 BANK_ID = "titanium-trust"
-MIN_CREDIT_SCORE = "500"
-MAX_LOAN_AMOUNT = "700000"
-BASE_RATE = "4"
+MIN_CREDIT_SCORE = 500
+MAX_LOAN_AMOUNT = 700000
+BASE_RATE = 4
 
 logging.basicConfig(level=logging.INFO)
 app = FastAPI()
 
 
-def calculate_interest_rate(amount, term, score, history):
+def calculate_interest_rate(amount: int, score: int):
     if amount <= float(MAX_LOAN_AMOUNT) and score >= float(MIN_CREDIT_SCORE):
         return BASE_RATE + random.random() * ((1000 - score) / 100.0)
 
 
 @app.post('/v1.0/loan/request')
 def bank_loan_request(loanRequest: LoanRequestModel):
-    logging.info(f"Received loan request {loanRequest} for {BANK_ID}")
+    logging.info(f"Titanium Trust Received loan request {loanRequest} for {BANK_ID}")
 
-    rate = calculate_interest_rate(loanRequest.amount, loanRequest.term, loanRequest.score, loanRequest.history)
+    rate = calculate_interest_rate(loanRequest.amount, loanRequest.credit.score)
 
     if rate:
         quote = {
@@ -40,13 +40,13 @@ def bank_loan_request(loanRequest: LoanRequestModel):
             'bankId': BANK_ID,
 
         }
-        logging.info("Offering Loan", quote)
+        logging.info("Titanium Trust Offering Loan", quote)
         return {
             'status': 'APROVED',
             'quote': quote
         }
     else:
-        logging.info('loan rejected')
+        logging.info('Titanium Trust rejected loan')
         return {
             'status': 'DENIED',
             'message': 'Loan Rejected'

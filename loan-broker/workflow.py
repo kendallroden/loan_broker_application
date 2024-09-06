@@ -52,8 +52,8 @@ def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: int):
 
 
 def riverstone_bank_quote(ctx, work_item: int):
-    credit = Credit(score="500")
-    loan_req = LoanRequestModel(amount="4000", term="6", credit=credit)
+    credit = Credit(score=500)
+    loan_req = LoanRequestModel(amount=4000, term=6, credit=credit)
     # assign package to available delivery guy.
     headers = {'dapr-app-id': target_riverstone_bank_app_id, 'dapr-api-token': target_riverstone_bank_api_token,
                'content-type': 'application/json'}
@@ -84,8 +84,8 @@ def riverstone_bank_quote(ctx, work_item: int):
 
 
 def titanium_trust_quote(ctx, work_item: int):
-    credit = Credit(score="500")
-    loan_req = LoanRequestModel(amount="4000", term="6", credit=credit)
+    credit = Credit(score=500)
+    loan_req = LoanRequestModel(amount=4000, term=6, credit=credit)
     # assign package to available delivery guy.
     headers = {'dapr-app-id': target_titanium_trust_app_id, 'dapr-api-token': target_titanium_trust_api_token,
                'content-type': 'application/json'}
@@ -116,8 +116,8 @@ def titanium_trust_quote(ctx, work_item: int):
 
 
 def union_vault_quote(ctx, work_item: int):
-    credit = Credit(score="500")
-    loan_req = LoanRequestModel(amount="4000", term="6", credit=credit)
+    credit = Credit(score=500)
+    loan_req = LoanRequestModel(amount=4000, term=6, credit=credit)
     # assign package to available delivery guy.
     headers = {'dapr-app-id': target_union_vault_app_id, 'dapr-api-token': target_union_vault_api_token,
                'content-type': 'application/json'}
