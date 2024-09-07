@@ -8,7 +8,7 @@ import logging
 from typing import List
 from dapr.ext.workflow import WorkflowRuntime, DaprWorkflowClient, DaprWorkflowContext, when_all
 from model.credit_bureau_model import CreditBureauModel
-from model.bank_model import LoanRequestModel, Credit
+from model.workflow_input_model import WorkflowInputModel
 from workflow import union_vault_quote, titanium_trust_quote, riverstone_bank_quote, process_results, \
     loan_broker_workflow, error_handler
 
@@ -72,15 +72,15 @@ def request_credit_score(credit_bureau: CreditBureauModel):
 
 
 @app.post('/workflow/loan-request')
-def request_loan_workflow(request_id: str, SSN: str, amount: int, term: int):
+def request_loan_workflow(workflow_input:WorkflowInputModel):
     try:
         with DaprClient() as d:
             headers = {'dapr-app-id': target_credit_bureau_app_id, 'dapr-api-token': dapr_api_token,
                        'content-type': 'application/json'}
             # request/response
-            logging.info(f'credit bureau request: {request_id} {amount} {term}')
+            logging.info(f'credit bureau request: {workflow_input.model_dump()}')
 
-            credit_bureau = CreditBureauModel(request_id=request_id, SSN=SSN)
+            credit_bureau = CreditBureauModel(request_id=workflow_input.request_id, SSN=workflow_input.SSN)
             result = requests.post(
                 url='%s/credit-bureau' % base_url,
                 json=credit_bureau.model_dump(),
@@ -100,9 +100,9 @@ def request_loan_workflow(request_id: str, SSN: str, amount: int, term: int):
                 start_workflow = d.start_workflow(
                     workflow_name='loan_broker_workflow',
                     input={
-                        "request_id": request_id,
-                        "amount": amount,
-                        "term": term,
+                        "request_id": workflow_input.request_id,
+                        "amount": workflow_input.amount,
+                        "term":workflow_input.term,
                         "score": credit_bureau['body']['score']
                     },
                     workflow_component="dapr"

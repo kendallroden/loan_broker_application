@@ -49,5 +49,6 @@ def bank_loan_request(loanRequest: LoanRequestModel):
         logging.info('Riverstone bank rejected rejected')
         return {
             'status': 'DENIED',
+            'bankId': BANK_ID,
             'message': 'Loan Rejected'
         }

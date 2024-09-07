@@ -49,5 +49,6 @@ def bank_loan_request(loanRequest: LoanRequestModel):
         logging.info('Union Vault Rejected Loan')
         return {
             'status': 'DENIED',
+            'bankId': BANK_ID,
             'message': 'Loan Rejected'
         }
