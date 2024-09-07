@@ -2,12 +2,13 @@ import json
 import os
 
 import requests
+from dapr.clients import DaprClient
 
-from fastapi import  HTTPException
+from fastapi import HTTPException
 import grpc
 import logging
 from typing import List
-from dapr.ext.workflow import  DaprWorkflowContext, when_all
+from dapr.ext.workflow import DaprWorkflowContext, when_all
 
 from model.bank_model import LoanRequestModel, Credit
 
@@ -19,6 +20,8 @@ target_credit_bureau_app_id = os.getenv('DAPR_CREDIT_BUREAU_APP_ID', '')
 target_union_vault_app_id = os.getenv('DAPR_UNION_VAULT_APP_ID', '')
 target_titanium_trust_app_id = os.getenv('DAPR_TITANIUM_TRUST_APP_ID', '')
 target_riverstone_bank_app_id = os.getenv('DAPR_RIVERSTONE_APP_ID', '')
+dapr_pub_sub = os.getenv('DAPR_PUB_SUB', '')
+dapr_subscription_topic = os.getenv('DAPR_SUBSCRIPTION_TOPIC', '')
 
 
 def error_handler(ctx, error):
@@ -43,14 +46,19 @@ def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: {}):
         # aggregate the results and send them to another activity
         logging.info(f'Workflow outputs: {outputs}')
 
-        #send aggregate to process results activity
-        yield ctx.call_activity(process_results, input=outputs)
+        qoute_aggregate = {
+            'request_id': wf_input['request_id'],
+            'outputs': outputs
+        }
+
+        # send aggregate to process results activity
+        yield ctx.call_activity(process_results, input=qoute_aggregate)
     except Exception as e:
         yield ctx.call_activity(error_handler, input=str(e))
         raise
 
 
-def riverstone_bank_quote(ctx, input:{}):
+def riverstone_bank_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
     loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
     # assign package to available delivery guy.
@@ -82,7 +90,7 @@ def riverstone_bank_quote(ctx, input:{}):
         raise HTTPException(status_code=500, detail=err.details())
 
 
-def titanium_trust_quote(ctx, input:{}):
+def titanium_trust_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
     loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
     # assign package to available delivery guy.
@@ -145,6 +153,19 @@ def union_vault_quote(ctx, input: {}):
         raise HTTPException(status_code=500, detail=err.details())
 
 
-def process_results(ctx, results: List):
+def process_results(ctx, results: {}):
     logging.info('Processing results.%s', json.dumps(results))
-    return "success"
+
+    with DaprClient() as d:
+        details = {
+            "quote_aggregate":json.dumps(results)
+        }
+        try:
+            d.publish_event(
+                pubsub_name=dapr_pub_sub,
+                topic_name=dapr_subscription_topic,
+                data=json.dumps(details),
+                data_content_type='application/json',
+            )
+        except grpc.RpcError as err:
+            logging.error(f"ErrorCode={err.code()}")
