@@ -8,7 +8,7 @@ apps:
     DAPR_CLIENT_TIMEOUT_SECONDS: 10
     DAPR_GRPC_ENDPOINT: https://grpc-prj211383.api.cloud.diagrid.io:443
     DAPR_HTTP_ENDPOINT: https://http-prj211383.api.cloud.diagrid.io
-  workDir: credit-bureau
+  workDir: services/credit-bureau
   command:
   - uvicorn
   - main:app
@@ -23,7 +23,7 @@ apps:
     DAPR_AGGREGATE_QUOTE_TOPIC_NAME: aggregate-qoute
     DAPR_GRPC_ENDPOINT: https://grpc-prj211383.api.cloud.diagrid.io:443
     DAPR_HTTP_ENDPOINT: https://http-prj211383.api.cloud.diagrid.io
-  workDir: quote-aggregator
+  workDir: services/quote-aggregator
   command:
   - uvicorn
   - main:app
@@ -37,7 +37,7 @@ apps:
     DAPR_CLIENT_TIMEOUT_SECONDS: 10
     DAPR_GRPC_ENDPOINT: https://grpc-prj211383.api.cloud.diagrid.io:443
     DAPR_HTTP_ENDPOINT: https://http-prj211383.api.cloud.diagrid.io
-  workDir: riverstone-bank
+  workDir: services/riverstone-bank
   command:
   - uvicorn
   - main:app
@@ -51,7 +51,7 @@ apps:
     DAPR_CLIENT_TIMEOUT_SECONDS: 10
     DAPR_GRPC_ENDPOINT: https://grpc-prj211383.api.cloud.diagrid.io:443
     DAPR_HTTP_ENDPOINT: https://http-prj211383.api.cloud.diagrid.io
-  workDir: titanium-trust
+  workDir: services/titanium-trust
   command:
   - uvicorn
   - main:app
@@ -65,7 +65,7 @@ apps:
     DAPR_CLIENT_TIMEOUT_SECONDS: 10
     DAPR_GRPC_ENDPOINT: https://grpc-prj211383.api.cloud.diagrid.io:443
     DAPR_HTTP_ENDPOINT: https://http-prj211383.api.cloud.diagrid.io
-  workDir: union-vault
+  workDir: services/union-vault
   command:
   - uvicorn
   - main:app
@@ -82,10 +82,12 @@ apps:
     DAPR_UNION_VAULT_API_TOKEN: diagrid://v1/a657cb15-9aa6-4bfd-b3c6-61e76a173cfb/211383/loan-broker-app/union-vault/2092bfb5-ffc7-487c-a625-39c2efbd7926
     DAPR_UNION_VAULT_APP_ID: union-vault
     DAPR_TITANIUM_TRUST_API_TOKEN: diagrid://v1/a657cb15-9aa6-4bfd-b3c6-61e76a173cfb/211383/loan-broker-app/titanium-trust/97f448d0-fde6-4c71-9880-5a759742fba7
+    DAPR_RIVERSTONE_BANK_API_TOKEN: diagrid://v1/a657cb15-9aa6-4bfd-b3c6-61e76a173cfb/211383/loan-broker-app/riverstone-bank/ec640f7f-4854-4a01-b9e8-e424da432c00
     DAPR_TITANIUM_TRUST_APP_ID: titanium-trust
+    DAPR_RIVERSTONE_APP_ID: riverstone-bank
     DAPR_GRPC_ENDPOINT: https://grpc-prj211383.api.cloud.diagrid.io:443
     DAPR_HTTP_ENDPOINT: https://http-prj211383.api.cloud.diagrid.io
-  workDir: loan-broker
+  workDir: services/loan-broker
   command:
   - uvicorn
   - main:app
