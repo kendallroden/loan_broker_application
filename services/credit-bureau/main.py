@@ -15,7 +15,7 @@ def get_random_int(min_value, max_value):
 app = FastAPI()
 
 
-@app.post('/v1.0/credit-bureau')
+@app.post('/credit-bureau')
 def credit_bureau_service(cbModel: CreditBureauModel):
     logging.info(f"Credit bureau, model: {cbModel.model_dump()}")
     min_score = 300

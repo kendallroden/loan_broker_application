@@ -2,13 +2,13 @@ import json
 import os
 
 import requests
-from dapr.clients import DaprClient
-from fastapi import FastAPI, HTTPException
+
+from fastapi import  HTTPException
 import grpc
 import logging
 from typing import List
-from dapr.ext.workflow import WorkflowRuntime, DaprWorkflowClient, DaprWorkflowContext, when_all
-from model.credit_bureau_model import CreditBureauModel
+from dapr.ext.workflow import  DaprWorkflowContext, when_all
+
 from model.bank_model import LoanRequestModel, Credit
 
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +42,7 @@ def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: int):
         # aggregate the results and send them to another activity
         logging.info(f'Workflow outputs: {outputs}')
 
+        #send aggregate to process results activity
         yield ctx.call_activity(process_results, input=outputs)
     except Exception as e:
         yield ctx.call_activity(error_handler, input=str(e))
@@ -57,7 +58,7 @@ def riverstone_bank_quote(ctx, work_item: int):
     # request/response
     try:
         result = requests.post(
-            url='%s/v1.0/loan/request' % dapr_http_endpoint,
+            url='%s/loan/request' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers
@@ -89,7 +90,7 @@ def titanium_trust_quote(ctx, work_item: int):
     # request/response
     try:
         result = requests.post(
-            url='%s/v1.0/loan/request' % dapr_http_endpoint,
+            url='%s/loan/request' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers
@@ -120,7 +121,7 @@ def union_vault_quote(ctx, work_item: int):
     # request/response
     try:
         result = requests.post(
-            url='%s/v1.0/loan/request' % dapr_http_endpoint,
+            url='%s/loan/request' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers

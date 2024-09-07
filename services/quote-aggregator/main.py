@@ -11,7 +11,7 @@ aggregate_quote_topic = os.getenv('DAPR_AGGREGATE_QUOTE_TOPIC_NAME', '')
 app = FastAPI()
 
 logging.basicConfig(level=logging.INFO)
-@app.post('/v1.0/subscribe/quote-aggregate')
+@app.post('/subscribe/quote-aggregate')
 def package_status_update(event: CloudEvent):
     with DaprClient() as d:
 

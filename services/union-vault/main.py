@@ -28,7 +28,7 @@ def calculate_interest_rate(amount: int, score: int):
         return BASE_RATE + random.random() * ((1000 - score) / 100.0)
 
 
-@app.post('/v1.0/loan/request')
+@app.post('/loan/request')
 def bank_loan_request(loanRequest: LoanRequestModel):
     logging.info(f"Received loan request {loanRequest} for {BANK_ID}")
 

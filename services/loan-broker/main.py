@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 base_url = os.getenv('DAPR_HTTP_ENDPOINT', 'http://localhost')
 target_credit_bureau_app_id = os.getenv('DAPR_CREDIT_BUREAU_APP_ID', '')
-target_credit_bureau_api_token = os.getenv('DAPR_CREDIT_BUREAU_API_TOKEN', '')
+dapr_api_token = os.getenv('DAPR_API_TOKEN', '')
 target_union_vault_app_id = os.getenv('DAPR_UNION_VAULT_APP_ID', '')
-target_union_vault_api_token = os.getenv('DAPR_UNION_VAULT_API_TOKEN', '')
+
 target_titanium_trust_app_id = os.getenv('DAPR_TITANIUM_TRUST_APP_ID', '')
-target_titanium_trust_api_token = os.getenv('DAPR_TITANIUM_TRUST_API_TOKEN', '')
+
 target_riverstone_bank_app_id = os.getenv('DAPR_RIVERSTONE_BANK_APP_ID', '')
-target_riverstone_bank_api_token = os.getenv('DAPR_RIVERSTONE_BANK_API_TOKEN', '')
+
 app = FastAPI()
 
 workflow_runtime = WorkflowRuntime()
@@ -35,13 +35,12 @@ workflow_runtime.register_activity(error_handler)
 workflow_runtime.start()
 
 
-@app.post('/v1.0/request/credit-bureau')
+@app.post('/request/credit-bureau')
 def request_credit_score(credit_bureau: CreditBureauModel):
     # assign package to available delivery guy.
-    headers = {'dapr-app-id': target_credit_bureau_app_id, 'dapr-api-token': target_credit_bureau_api_token,
+    headers = {'dapr-app-id': target_credit_bureau_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
-
     logging.info(f'credit bureau request: {credit_bureau.model_dump()}')
     try:
         result = requests.post(
@@ -54,7 +53,7 @@ def request_credit_score(credit_bureau: CreditBureauModel):
             logging.info('Invocation successful with status code: %s' %
                          result.status_code)
             logging.info("result is %s" % result.json())
-            credit_bureau = result.json()
+            #credit_bureau = result.json()
 
             return result.json()
 
@@ -68,8 +67,8 @@ def request_credit_score(credit_bureau: CreditBureauModel):
         raise HTTPException(status_code=500, detail=err.details())
 
 
-@app.post('/v1.0/seek-loan')
-def seek_broker_loan():
+@app.post('/workflow/loan-request')
+def request_loan_workflow():
     try:
         with DaprClient() as d:
             start_workflow = d.start_workflow(
