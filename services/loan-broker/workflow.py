@@ -22,6 +22,7 @@ target_titanium_trust_app_id = os.getenv('DAPR_TITANIUM_TRUST_APP_ID', '')
 target_riverstone_bank_app_id = os.getenv('DAPR_RIVERSTONE_APP_ID', '')
 dapr_pub_sub = os.getenv('DAPR_PUB_SUB', '')
 dapr_subscription_topic = os.getenv('DAPR_SUBSCRIPTION_TOPIC', '')
+aggregate_table = os.getenv('DAPR_QUOTE_AGGREGATE_TABLE', '')
 
 
 def error_handler(ctx, error):
@@ -154,18 +155,18 @@ def union_vault_quote(ctx, input: {}):
 
 
 def process_results(ctx, results: {}):
-    logging.info('Processing results.%s', json.dumps(results))
-
     with DaprClient() as d:
+        logging.info('Processing results.%s', json.dumps(results))
         details = {
-            "quote_aggregate":json.dumps(results)
+            "event_type": "quote-aggregate",
+            "quote_aggregate": results
         }
-        try:
-            d.publish_event(
-                pubsub_name=dapr_pub_sub,
-                topic_name=dapr_subscription_topic,
-                data=json.dumps(details),
-                data_content_type='application/json',
-            )
-        except grpc.RpcError as err:
-            logging.error(f"ErrorCode={err.code()}")
+
+        d.save_state(store_name=aggregate_table,
+                     key=str(results['request_id']),
+                     value=json.dumps(details),
+                     state_metadata={"contentType": "application/json"})
+
+        logging.info(f"we inside the process results")
+
+        return "success"

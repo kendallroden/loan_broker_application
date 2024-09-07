@@ -80,9 +80,10 @@ apps:
     DAPR_CREDIT_BUREAU_APP_ID: credit-bureau
     DAPR_UNION_VAULT_APP_ID: union-vault
     DAPR_TITANIUM_TRUST_APP_ID: titanium-trust
-    DAPR_PUB_SUB: aws-pubsub
+    DAPR_PUB_SUB: aws-broker
     DAPR_SUBSCRIPTION_TOPIC: aggregate-quote
     DAPR_RIVERSTONE_APP_ID: riverstone-bank
+    DAPR_QUOTE_AGGREGATE_TABLE: quote-aggregate-table
     DAPR_GRPC_ENDPOINT: https://grpc-prj211383.api.cloud.diagrid.io:443
     DAPR_HTTP_ENDPOINT: https://http-prj211383.api.cloud.diagrid.io
   workDir: services/loan-broker

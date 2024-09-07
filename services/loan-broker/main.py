@@ -1,3 +1,4 @@
+import json
 import os
 
 import requests
@@ -19,7 +20,9 @@ base_url = os.getenv('DAPR_HTTP_ENDPOINT', 'http://localhost')
 target_credit_bureau_app_id = os.getenv('DAPR_CREDIT_BUREAU_APP_ID', '')
 dapr_api_token = os.getenv('DAPR_API_TOKEN', '')
 target_union_vault_app_id = os.getenv('DAPR_UNION_VAULT_APP_ID', '')
-
+dapr_pub_sub = os.getenv('DAPR_PUB_SUB', '')
+dapr_subscription_topic = os.getenv('DAPR_SUBSCRIPTION_TOPIC', '')
+aggregate_table = os.getenv('DAPR_QUOTE_AGGREGATE_TABLE', '')
 target_titanium_trust_app_id = os.getenv('DAPR_TITANIUM_TRUST_APP_ID', '')
 
 target_riverstone_bank_app_id = os.getenv('DAPR_RIVERSTONE_BANK_APP_ID', '')
@@ -38,37 +41,30 @@ workflow_runtime.start()
 
 @app.post('/request/credit-bureau')
 def request_credit_score(credit_bureau: CreditBureauModel):
-    # assign package to available delivery guy.
-    headers = {'dapr-app-id': target_credit_bureau_app_id, 'dapr-api-token': dapr_api_token,
-               'content-type': 'application/json'}
-    # request/response
-    logging.info(f'credit bureau request: {credit_bureau.model_dump()}')
-    try:
-        result = requests.post(
-            url='%s/credit-bureau' % base_url,
-            json=credit_bureau.model_dump(),
-            headers=headers
-        )
+    with DaprClient() as d:
+        # assign package to available delivery guy.
+        headers = {'dapr-app-id': target_credit_bureau_app_id, 'dapr-api-token': dapr_api_token,
+                   'content-type': 'application/json'}
+        # request/response
+        logging.info(f'credit bureau request: {credit_bureau.model_dump()}')
 
-        if result.ok:
-            logging.info('Invocation successful with status code: %s' %
-                         result.status_code)
+        details = {
+            "event_type": "quote-aggregate",
+            "quote_aggregate": credit_bureau.model_dump()
+        }
 
-            logging.info("result is %s" % result.json())
 
-            credit_bureau = result.json()
-            logging.info("credit score is {}".format(credit_bureau['body']['score']))
+        try:
+            d.publish_event(
+                pubsub_name=dapr_pub_sub,
+                topic_name=dapr_subscription_topic,
+                data=json.dumps(details),
+                data_content_type='application/json',
+            )
 
-            return result.json()
-
-        else:
-            logging.error(
-                'Error occurred while invoking App ID: %s' % result.reason)
-            raise HTTPException(status_code=500, detail=result.reason)
-
-    except grpc.RpcError as err:
-        logging.error(f"ErrorCode={err.code()}")
-        raise HTTPException(status_code=500, detail=err.details())
+        except grpc.RpcError as err:
+            logging.error(f"ErrorCode={err.code()}")
+            raise HTTPException(status_code=500, detail=err.details())
 
 
 @app.post('/workflow/loan-request')
