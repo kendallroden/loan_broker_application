@@ -9,7 +9,8 @@ from typing import List
 from dapr.ext.workflow import WorkflowRuntime, DaprWorkflowClient, DaprWorkflowContext, when_all
 from model.credit_bureau_model import CreditBureauModel
 from model.bank_model import LoanRequestModel, Credit
-from workflow import union_vault_quote,titanium_trust_quote,riverstone_bank_quote,process_results,loan_broker_workflow,error_handler
+from workflow import union_vault_quote, titanium_trust_quote, riverstone_bank_quote, process_results, \
+    loan_broker_workflow, error_handler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -71,26 +72,46 @@ def request_credit_score(credit_bureau: CreditBureauModel):
 
 
 @app.post('/workflow/loan-request')
-def request_loan_workflow():
+def request_loan_workflow(request_id: str, SSN: str, amount: int, term: int):
     try:
         with DaprClient() as d:
-            start_workflow = d.start_workflow(
-                workflow_name='loan_broker_workflow',
-                input=3,
-                workflow_component="dapr"
+            headers = {'dapr-app-id': target_credit_bureau_app_id, 'dapr-api-token': dapr_api_token,
+                       'content-type': 'application/json'}
+            # request/response
+            logging.info(f'credit bureau request: {request_id} {amount} {term}')
+
+            credit_bureau = CreditBureauModel(request_id=request_id, SSN=SSN)
+            result = requests.post(
+                url='%s/credit-bureau' % base_url,
+                json=credit_bureau.model_dump(),
+                headers=headers
             )
-            logging.info(f'Starting workflow with instance id: {start_workflow.instance_id}')
-            return {"message": "Workflow started successfully", "workflow_id": start_workflow.instance_id}
+            if result.ok:
+                logging.info('Invocation successful with status code: %s' %
+                             result.status_code)
+
+                logging.info("result is %s" % result.json())
+
+                credit_bureau = result.json()
+                logging.info("credit score is {}".format(credit_bureau['body']['score']))
+
+                # Start workflow
+
+                start_workflow = d.start_workflow(
+                    workflow_name='loan_broker_workflow',
+                    input={
+                        "request_id": request_id,
+                        "amount": amount,
+                        "term": term,
+                        "score": credit_bureau['body']['score']
+                    },
+                    workflow_component="dapr"
+                )
+                logging.info(f'Starting workflow with instance id: {start_workflow.instance_id}')
+                return {"message": "Workflow started successfully", "workflow_id": start_workflow.instance_id}
+
+
 
     except grpc.RpcError as err:
-        logger.error(f"Failed to start workflow: {err}")
+        logger.error(f"an error occured: {err}")
         raise HTTPException(status_code=500, detail=str(err))
-
-
-
-
-
-
-
-
-

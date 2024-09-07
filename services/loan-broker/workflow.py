@@ -27,16 +27,17 @@ def error_handler(ctx, error):
     return "error"
 
 
-def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: int):
+def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: {}):
     # get a batch of N work items to process in parallel
     logging.info(f'Starting workflow with instance id: {ctx.instance_id}')
+    logging.info(f'Workflow input: {wf_input}')
     # work_batch = yield ctx.call_activity(get_work_batch, input=wf_input)
 
     # schedule N parallel tasks to process the work items and wait for all to complete
     try:
-        parallel_tasks = [ctx.call_activity(riverstone_bank_quote, input=1),
-                          ctx.call_activity(titanium_trust_quote, input=1),
-                          ctx.call_activity(union_vault_quote, input=1)]
+        parallel_tasks = [ctx.call_activity(riverstone_bank_quote, input=wf_input),
+                          ctx.call_activity(titanium_trust_quote, input=wf_input),
+                          ctx.call_activity(union_vault_quote, input=wf_input)]
         outputs = yield when_all(parallel_tasks)
 
         # aggregate the results and send them to another activity
@@ -49,9 +50,9 @@ def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: int):
         raise
 
 
-def riverstone_bank_quote(ctx, work_item: int):
-    credit = Credit(score=500)
-    loan_req = LoanRequestModel(amount=4000, term=6, credit=credit)
+def riverstone_bank_quote(ctx, input:{}):
+    credit = Credit(score=input['score'])
+    loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
     # assign package to available delivery guy.
     headers = {'dapr-app-id': target_riverstone_bank_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
@@ -81,9 +82,9 @@ def riverstone_bank_quote(ctx, work_item: int):
         raise HTTPException(status_code=500, detail=err.details())
 
 
-def titanium_trust_quote(ctx, work_item: int):
-    credit = Credit(score=500)
-    loan_req = LoanRequestModel(amount=4000, term=6, credit=credit)
+def titanium_trust_quote(ctx, input:{}):
+    credit = Credit(score=input['score'])
+    loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
     # assign package to available delivery guy.
     headers = {'dapr-app-id': target_titanium_trust_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
@@ -113,9 +114,9 @@ def titanium_trust_quote(ctx, work_item: int):
         raise HTTPException(status_code=500, detail=err.details())
 
 
-def union_vault_quote(ctx, work_item: int):
-    credit = Credit(score=500)
-    loan_req = LoanRequestModel(amount=4000, term=6, credit=credit)
+def union_vault_quote(ctx, input: {}):
+    credit = Credit(score=input['score'])
+    loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
     headers = {'dapr-app-id': target_union_vault_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
