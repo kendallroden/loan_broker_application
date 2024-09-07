@@ -44,7 +44,7 @@ def request_credit_score(credit_bureau: CreditBureauModel):
     logging.info(f'credit bureau request: {credit_bureau.model_dump()}')
     try:
         result = requests.post(
-            url='%s/v1.0/credit-bureau' % base_url,
+            url='%s/credit-bureau' % base_url,
             json=credit_bureau.model_dump(),
             headers=headers
         )
@@ -52,8 +52,11 @@ def request_credit_score(credit_bureau: CreditBureauModel):
         if result.ok:
             logging.info('Invocation successful with status code: %s' %
                          result.status_code)
+
             logging.info("result is %s" % result.json())
-            #credit_bureau = result.json()
+
+            credit_bureau = result.json()
+            logging.info("credit score is {}".format(credit_bureau['body']['score']))
 
             return result.json()
 
