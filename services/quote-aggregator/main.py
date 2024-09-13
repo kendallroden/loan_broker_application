@@ -20,16 +20,16 @@ def quote_aggregate(event: CloudEvent):
         try:
 
             logging.info(f'quote aggregate event: %s:' % event.model_dump_json())
-            logging.info(f'Received event: %s:' % {event.data['quote-aggregate']})
+            logging.info(f'Received event: %s:' % {event.data["quote_aggregate"]})
 
-            quote_aggregate = json.loads(event.data['quote-aggregate'])
+            quote_aggregate = json.loads(event.data['quote_aggregate'])
             # save aggregate data
             d.save_state(store_name=quote_aggregate_table,
                          key=str(quote_aggregate['request_id']),
                          value=json.dumps(quote_aggregate),
                          state_metadata={"contentType": "application/json"})
 
-            logging.info("Group Info saved successfully")
+
         except grpc.RpcError as err:
             logging.info(f"Error={err}")
             raise HTTPException(status_code=500, detail=err.details())

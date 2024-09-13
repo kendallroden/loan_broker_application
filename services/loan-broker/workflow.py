@@ -159,7 +159,7 @@ def process_results(ctx, results: {}):
         logging.info('Processing results.%s', json.dumps(results))
         details = {
             "event_type": "quote-aggregate",
-            "quote_aggregate": results
+            "quote_aggregate": json.dumps(results)
         }
 
         #push aggregate results as an event to quote-aggregate
