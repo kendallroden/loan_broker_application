@@ -62,7 +62,7 @@ def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: {}):
 def riverstone_bank_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
     loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
-    # assign package to available delivery guy.
+
     headers = {'dapr-app-id': target_riverstone_bank_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
@@ -94,7 +94,7 @@ def riverstone_bank_quote(ctx, input: {}):
 def titanium_trust_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
     loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
-    # assign package to available delivery guy.
+
     headers = {'dapr-app-id': target_titanium_trust_app_id, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
@@ -162,11 +162,12 @@ def process_results(ctx, results: {}):
             "quote_aggregate": results
         }
 
-        d.save_state(store_name=aggregate_table,
-                     key=str(results['request_id']),
-                     value=json.dumps(details),
-                     state_metadata={"contentType": "application/json"})
-
-        logging.info(f"we inside the process results")
+        #push aggregate results as an event to quote-aggregate
+        d.publish_event(
+            pubsub_name=dapr_pub_sub,
+            topic_name=dapr_subscription_topic,
+            data=json.dumps(details),
+            data_content_type='application/json',
+        )
 
         return "success"

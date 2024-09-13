@@ -40,13 +40,13 @@ def bank_loan_request(loanRequest: LoanRequestModel):
             'bankId': BANK_ID,
 
         }
-        logging.info("Union Vault loan approved with qoute", quote)
+        logging.info("Union Vault Approved load Request with qoute", quote)
         return {
             'status': 'APPROVED',
             'quote': quote
         }
     else:
-        logging.info('Union Vault Rejected Loan')
+        logging.info('Union Vault Rejected Loan Request')
         return {
             'status': 'DENIED',
             'bankId': BANK_ID,

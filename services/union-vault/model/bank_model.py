@@ -6,7 +6,6 @@ class Credit(BaseModel):
 
 
 class LoanRequestModel(BaseModel):
-
     amount: int  # loan amount
     term: int  # the number of months until the loan has to be paid off
     credit: Credit

@@ -39,33 +39,6 @@ workflow_runtime.register_activity(error_handler)
 workflow_runtime.start()
 
 
-@app.post('/request/credit-bureau')
-def request_credit_score(credit_bureau: CreditBureauModel):
-    with DaprClient() as d:
-        # assign package to available delivery guy.
-        headers = {'dapr-app-id': target_credit_bureau_app_id, 'dapr-api-token': dapr_api_token,
-                   'content-type': 'application/json'}
-        # request/response
-        logging.info(f'credit bureau request: {credit_bureau.model_dump()}')
-
-        details = {
-            "event_type": "quote-aggregate",
-            "quote_aggregate": credit_bureau.model_dump()
-        }
-
-
-        try:
-            d.publish_event(
-                pubsub_name=dapr_pub_sub,
-                topic_name=dapr_subscription_topic,
-                data=json.dumps(details),
-                data_content_type='application/json',
-            )
-
-        except grpc.RpcError as err:
-            logging.error(f"ErrorCode={err.code()}")
-            raise HTTPException(status_code=500, detail=err.details())
-
 
 @app.post('/workflow/loan-request')
 def request_loan_workflow(workflow_input:WorkflowInputModel):

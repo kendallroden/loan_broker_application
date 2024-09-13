@@ -40,13 +40,13 @@ def bank_loan_request(loanRequest: LoanRequestModel):
             'bankId': BANK_ID,
 
         }
-        logging.info("Titanium Trust Offering Loan", quote)
+        logging.info("Titanium Trust Approved Loan Request", quote)
         return {
-            'status': 'APROVED',
+            'status': 'APPROVED',
             'quote': quote
         }
     else:
-        logging.info('Titanium Trust rejected loan')
+        logging.info('Titanium Trust Rejected Loan Request')
         return {
             'status': 'DENIED',
             'bankId': BANK_ID,

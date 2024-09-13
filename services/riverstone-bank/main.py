@@ -40,13 +40,13 @@ def bank_loan_request(loanRequest: LoanRequestModel):
             'bankId': BANK_ID,
 
         }
-        logging.info("Riverstone bank approved loan with qoute", quote)
+        logging.info("Riverstone bank Approved loan request with qoute", quote)
         return {
             'status': 'APPROVED',
             'quote': quote
         }
     else:
-        logging.info('Riverstone bank rejected rejected')
+        logging.info('Riverstone bank rejected loan request')
         return {
             'status': 'DENIED',
             'bankId': BANK_ID,
