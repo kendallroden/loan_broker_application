@@ -20,8 +20,8 @@ riverstone_bank_appid = os.getenv('RIVERSTONE_APP_ID', '')
 
 dapr_http_endpoint = os.getenv('DAPR_HTTP_ENDPOINT', 'http://localhost')
 dapr_api_token = os.getenv('DAPR_API_TOKEN', '')
-pubsub_component = os.getenv('PUBSUB_COMPONENT', '')
-subscription_topic = os.getenv('SUBSCRIPTION_TOPIC', '')
+pubsub_component = os.getenv('PUBSUB_COMPONENT', 'pubsub')
+subscription_topic = os.getenv('TOPIC_NAME', 'quotes')
 
 
 def error_handler(ctx, error):

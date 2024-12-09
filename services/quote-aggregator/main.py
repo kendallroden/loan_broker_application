@@ -13,9 +13,14 @@ app = FastAPI()
 
 logging.basicConfig(level=logging.INFO)
 
+async def main():
+    async with DaprClient() as client:
+    
+        subscription = await client.subscribe_with_handler(
+                pubsub_name='pubsub', topic='quotes', handler_fn=loan_quotes, dead_letter_topic='undeliverable')
 
-@app.post('/loan-quotes')
-def loan_quotes(event: CloudEvent):
+
+async def loan_quotes(event: CloudEvent) -> TopicEventResponse:
     
     with DaprClient() as d:
         try:
@@ -34,3 +39,7 @@ def loan_quotes(event: CloudEvent):
         except grpc.RpcError as err:
             logging.info(f"Error={err}")
             raise HTTPException(status_code=500, detail=err.details())
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
