@@ -7,7 +7,6 @@ from model.credit_bureau_model import CreditBureauModel
 
 logging.basicConfig(level=logging.INFO)
 
-
 def get_random_int(min_value, max_value):
     return min_value + random.randint(0, max_value - min_value)
 
@@ -15,9 +14,9 @@ def get_random_int(min_value, max_value):
 app = FastAPI()
 
 
-@app.post('/credit-bureau')
+@app.post('/credit-score')
 def credit_bureau_service(cbModel: CreditBureauModel):
-    logging.info(f"Credit bureau, model: {cbModel.model_dump()}")
+    
     min_score = 300
     max_score = 900
 

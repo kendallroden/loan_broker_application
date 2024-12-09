@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 
 
-class WorkflowInputModel(BaseModel):
-    request_id: str
+class LoanRequest(BaseModel):
+    id: str
     SSN: str
     amount: int
     term: int

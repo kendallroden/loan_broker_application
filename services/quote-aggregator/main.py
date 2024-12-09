@@ -7,22 +7,23 @@ import logging
 import os
 from model.cloud_events import CloudEvent
 
-quote_aggregate_table = os.getenv('DAPR_QUOTE_AGGREGATE_TABLE', '')
+quote_aggregate_table = os.getenv('QUOTE_AGGREGATE_TABLE', '')
 
 app = FastAPI()
 
 logging.basicConfig(level=logging.INFO)
 
 
-@app.post('/bureau/quote-aggregate')
-def quote_aggregate(event: CloudEvent):
+@app.post('/loan-quotes')
+def loan_quotes(event: CloudEvent):
+    
     with DaprClient() as d:
         try:
 
-            logging.info(f'quote aggregate event: %s:' % event.model_dump_json())
             logging.info(f'Received event: %s:' % {event.data["quote_aggregate"]})
 
             quote_aggregate = json.loads(event.data['quote_aggregate'])
+            
             # save aggregate data
             d.save_state(store_name=quote_aggregate_table,
                          key=str(quote_aggregate['request_id']),

@@ -14,15 +14,14 @@ from model.bank_model import LoanRequestModel, Credit
 
 logging.basicConfig(level=logging.INFO)
 
+union_vault_appid = os.getenv('UNION_VAULT_APP_ID', '')
+titanium_trust_appid = os.getenv('TITANIUM_TRUST_APP_ID', '')
+riverstone_bank_appid = os.getenv('RIVERSTONE_APP_ID', '')
+
 dapr_http_endpoint = os.getenv('DAPR_HTTP_ENDPOINT', 'http://localhost')
 dapr_api_token = os.getenv('DAPR_API_TOKEN', '')
-target_credit_bureau_app_id = os.getenv('DAPR_CREDIT_BUREAU_APP_ID', '')
-target_union_vault_app_id = os.getenv('DAPR_UNION_VAULT_APP_ID', '')
-target_titanium_trust_app_id = os.getenv('DAPR_TITANIUM_TRUST_APP_ID', '')
-target_riverstone_bank_app_id = os.getenv('DAPR_RIVERSTONE_APP_ID', '')
-dapr_pub_sub = os.getenv('DAPR_PUB_SUB', '')
-dapr_subscription_topic = os.getenv('DAPR_SUBSCRIPTION_TOPIC', '')
-aggregate_table = os.getenv('DAPR_QUOTE_AGGREGATE_TABLE', '')
+pubsub_component = os.getenv('PUBSUB_COMPONENT', '')
+subscription_topic = os.getenv('SUBSCRIPTION_TOPIC', '')
 
 
 def error_handler(ctx, error):
@@ -32,28 +31,26 @@ def error_handler(ctx, error):
 
 
 def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: {}):
-    # get a batch of N work items to process in parallel
-    logging.info(f'Starting workflow with instance id: {ctx.instance_id}')
+   
+    
+    logging.info(f'Loan broaker workflow started with instance id: {ctx.instance_id}')
     logging.info(f'Workflow input: {wf_input}')
-    # work_batch = yield ctx.call_activity(get_work_batch, input=wf_input)
 
-    # schedule N parallel tasks to process the work items and wait for all to complete
+    # schedule tasks to process the calls to each provider 
     try:
-        parallel_tasks = [ctx.call_activity(riverstone_bank_quote, input=wf_input),
+        loan_broker_results = [ctx.call_activity(riverstone_bank_quote, input=wf_input),
                           ctx.call_activity(titanium_trust_quote, input=wf_input),
                           ctx.call_activity(union_vault_quote, input=wf_input)]
-        outputs = yield when_all(parallel_tasks)
+        results = yield when_all(loan_broker_results)
 
         # aggregate the results and send them to another activity
-        logging.info(f'Workflow outputs: {outputs}')
-
-        qoute_aggregate = {
+        quote_aggregate = {
             'request_id': wf_input['request_id'],
-            'outputs': outputs
+            'results': results
         }
 
-        # send aggregate to process results activity
-        yield ctx.call_activity(process_results, input=qoute_aggregate)
+        yield ctx.call_activity(process_results, input=quote_aggregate)
+    
     except Exception as e:
         yield ctx.call_activity(error_handler, input=str(e))
         raise
@@ -61,9 +58,9 @@ def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: {}):
 
 def riverstone_bank_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
-    loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
+    loan_req = CreditLoanRequest(amount=input['amount'], term=input['term'], credit=credit)
 
-    headers = {'dapr-app-id': target_riverstone_bank_app_id, 'dapr-api-token': dapr_api_token,
+    headers = {'dapr-app-id': riverstone_bank_appid, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
@@ -94,8 +91,7 @@ def riverstone_bank_quote(ctx, input: {}):
 def titanium_trust_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
     loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
-
-    headers = {'dapr-app-id': target_titanium_trust_app_id, 'dapr-api-token': dapr_api_token,
+    headers = {'dapr-app-id': titanium_trust_appid, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
@@ -126,7 +122,7 @@ def titanium_trust_quote(ctx, input: {}):
 def union_vault_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
     loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
-    headers = {'dapr-app-id': target_union_vault_app_id, 'dapr-api-token': dapr_api_token,
+    headers = {'dapr-app-id': union_vault_appid, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
@@ -162,9 +158,9 @@ def process_results(ctx, results: {}):
             "quote_aggregate": json.dumps(results)
         }
 
-        #push aggregate results as an event to quote-aggregate
+        # push aggregate results as an event to quote-aggregate
         d.publish_event(
-            pubsub_name=dapr_pub_sub,
+            pubsub_name=dapr_pubsub,
             topic_name=dapr_subscription_topic,
             data=json.dumps(details),
             data_content_type='application/json',
