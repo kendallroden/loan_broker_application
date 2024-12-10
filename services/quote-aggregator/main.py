@@ -6,7 +6,7 @@ import logging
 import os
 from dapr.clients import DaprClient
 from dapr.clients.grpc._response import TopicEventResponse
-from model.cloud_events import CloudEvent
+# from model.cloud_events import CloudEvent
 
 quote_aggregate_table = os.getenv('QUOTE_AGGREGATE_TABLE', '')
 
@@ -26,13 +26,13 @@ def main():
     close_fn()
 
 
-def loan_quotes(event: CloudEvent) -> TopicEventResponse:
+def loan_quotes(message):
     with DaprClient() as d:
         try:
 
-            logging.info(f'Received event: %s:' % {event.data["quote_aggregate"]})
+            logging.info(f'Received event: %s:' % {message.data["quote_aggregate"]})
 
-            quote_aggregate = json.loads(event.data['quote_aggregate'])
+            quote_aggregate = json.loads(message.data['quote_aggregate'])
             
             # save aggregate data
             d.save_state(store_name=quote_aggregate_table,
