@@ -58,7 +58,7 @@ def check_python_installed():
 def create_project(project_name):
     with yaspin(text=f"Creating project {project_name}...") as spinner:
         try:
-            run_command(f"diagrid project create {project_name}", check=True)
+            run_command(f"diagrid project create {project_name} --deploy-managed-kv --deploy-managed-pubsub", check=True)
             spinner.ok("✅")
         except subprocess.CalledProcessError as e:
             spinner.fail("❌")
@@ -69,19 +69,19 @@ def create_project(project_name):
             sys.exit(1)
 
 
-def create_dynamodb_table(table_name: str):
-    with yaspin(text=f"Creating dynamodb store {table_name}...") as spinner:
-        try:
+# def create_dynamodb_table(table_name: str):
+#     with yaspin(text=f"Creating dynamodb store {table_name}...") as spinner:
+#         try:
 
-            run_command(f"aws dynamodb create-table --table-name {table_name} --attribute-definitions AttributeName=key,AttributeType=S --key-schema AttributeName=key,KeyType=HASH \
---provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5")
-            spinner.ok("✅")
-        except subprocess.CalledProcessError as e:
-            spinner.fail(f"❌")
-            if e.output:
-                spinner.write(f"Error: {e.output}")
-            if e.stderr:
-                spinner.write(f"Error: {e.stderr}")
+#             run_command(f"aws dynamodb create-table --table-name {table_name} --attribute-definitions AttributeName=key,AttributeType=S --key-schema AttributeName=key,KeyType=HASH \
+# --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5")
+#             spinner.ok("✅")
+#         except subprocess.CalledProcessError as e:
+#             spinner.fail(f"❌")
+#             if e.output:
+#                 spinner.write(f"Error: {e.output}")
+#             if e.stderr:
+#                 spinner.write(f"Error: {e.stderr}")
             sys.exit(1)
 
 
@@ -100,24 +100,24 @@ def create_appid(project_name, appid_name):
             sys.exit(1)
 
 
-def create_component(project_name, component_name, component_type, scope,
-                     table_name=None):
-    with yaspin(text=f"Creating component {component_name}...", timer=True) as spinner:
-        try:
-            CONNECTION_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
-            CONNECTION_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
-            AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
-            if component_type == "pubsub":
-                run_command(
-                    f"diagrid component create {component_name} --type pubsub.aws.snssqs --metadata accessKey={CONNECTION_ACCESS_KEY} --metadata secretKey={CONNECTION_SECRET_KEY} --metadata awsRegion={AWS_DEFAULT_REGION} --project {project_name}"
-                )
-                time.sleep(35)
-                spinner.ok("✅")
-            else:
-                run_command(
-                    f"diagrid component create {component_name} --type state.aws.dynamodb --metadata accessKey={CONNECTION_ACCESS_KEY} --metadata secretKey={CONNECTION_SECRET_KEY} --metadata awsRegion={AWS_DEFAULT_REGION} --metadata table={table_name} --scopes {scope} --project {project_name}",
-                    check=True)
-                spinner.ok("✅")
+# def create_component(project_name, component_name, component_type, scope,
+#                      table_name=None):
+#     with yaspin(text=f"Creating component {component_name}...", timer=True) as spinner:
+#         try:
+#             CONNECTION_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
+#             CONNECTION_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+#             AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
+#             if component_type == "pubsub":
+#                 run_command(
+#                     f"diagrid component create {component_name} --type pubsub.aws.snssqs --metadata accessKey={CONNECTION_ACCESS_KEY} --metadata secretKey={CONNECTION_SECRET_KEY} --metadata awsRegion={AWS_DEFAULT_REGION} --project {project_name}"
+#                 )
+#                 time.sleep(35)
+#                 spinner.ok("✅")
+#             else:
+#                 run_command(
+#                     f"diagrid component create {component_name} --type state.aws.dynamodb --metadata accessKey={CONNECTION_ACCESS_KEY} --metadata secretKey={CONNECTION_SECRET_KEY} --metadata awsRegion={AWS_DEFAULT_REGION} --metadata table={table_name} --scopes {scope} --project {project_name}",
+#                     check=True)
+#                 spinner.ok("✅")
 
 
         except subprocess.CalledProcessError as e:
@@ -129,20 +129,20 @@ def create_component(project_name, component_name, component_type, scope,
             sys.exit(1)
 
 
-def create_subscription(project_name: str, subscription_name: str):
-    with yaspin(text=f"Creating subscription {subscription_name} for project {project_name}") as spinner:
-        try:
-            print(f"Group Subscription yaml file path {group_subs_file_path}")
-            run_command(
-                f"diagrid subscriptions apply --wait --file {group_subs_file_path}")
-            spinner.ok("✅")
-        except subprocess.CalledProcessError as e:
-            spinner.fail("❌")
-            if e.output:
-                spinner.write(f"{e.output}")
-            if e.stderr:
-                spinner.write(f"{e.stderr}")
-            sys.exit(1)
+# def create_subscription(project_name: str, subscription_name: str):
+#     with yaspin(text=f"Creating subscription {subscription_name} for project {project_name}") as spinner:
+#         try:
+#             print(f"Subscription yaml file path {group_subs_file_path}")
+#             run_command(
+#                 f"diagrid subscriptions apply --wait --file {group_subs_file_path}")
+#             spinner.ok("✅")
+#         except subprocess.CalledProcessError as e:
+#             spinner.fail("❌")
+#             if e.output:
+#                 spinner.write(f"{e.output}")
+#             if e.stderr:
+#                 spinner.write(f"{e.stderr}")
+#             sys.exit(1)
 
 
 def check_appid_status(project_name, appid_name):
@@ -230,12 +230,12 @@ def scaffold_and_update_config(config_file):
 
 
 def main():
-    prj_name = os.getenv('GROUP_CHAT_MICROSERVICES')
+    prj_name = os.getenv('PROJECT_NAME')
 
     config_file_name = f"dev-{prj_name}.yaml"
     os.environ['CONFIG_FILE'] = config_file_name
 
-    parser = argparse.ArgumentParser(description="Run the setup script for Diagrid projects.")
+    parser = argparse.ArgumentParser(description="Run the project setup script.")
     parser.add_argument('--project-name', type=str, default=prj_name,
                         help="The name of the project to create/use.")
     parser.add_argument('--config-file', type=str, default=config_file_name,
@@ -253,42 +253,39 @@ def main():
 
     # CREATE APP IDS
     for service_name in service_name_list:
-        print(f"folder name is {service_name}")
         create_appid(prj_name, service_name)
 
-    # CREATE DYNAMODB TABLE
-    for service_name in service_name_list:
-        print(f"folder name is {service_name}")
-        create_dynamodb_table(f"{service_name}-table")
+    # # CREATE DYNAMODB TABLE
+    # for service_name in service_name_list:
+    #     print(f"folder name is {service_name}")
+    #     create_dynamodb_table(f"{service_name}-table")
 
     for service_name in service_name_list:
-        print(f"folder name is {service_name}")
         check_appid_status(project_name, service_name)
 
-    # CREATE PUBSUB CONNECTION
-    component_type = "pubsub"
-    component_name = "aws-pubsub"
+    # CREATE PUBSUB COMPONENT
+    # component_type = "pubsub"
+    # component_name = "aws-pubsub"
 
-    scopes = ', '.join(f'"{service_name}"' for service_name in service_name_list)
-    print(f"scopes are {scopes}")
+    # scopes = ', '.join(f'"{service_name}"' for service_name in service_name_list)
+    # print(f"scopes are {scopes}")
 
-    create_component(prj_name, component_name, component_type, scopes,
-                     )
+    # create_component(prj_name, component_name, component_type, scopes)
 
-    # CREATE STATE CONNECTION
-    for service_name in service_name_list:
-        component_name = f"{service_name}-table"
-        component_type = "state"
-        scope = service_name
-        table_name = f"{service_name}-table"
+    # # CREATE STATE CONNECTION
+    # for service_name in service_name_list:
+    #     component_name = f"{service_name}-table"
+    #     component_type = "state"
+    #     scope = service_name
+    #     table_name = f"{service_name}-table"
 
-        create_component(prj_name, component_name, component_type, scope,
-                         table_name)
+    #     create_component(prj_name, component_name, component_type, scope,
+    #                      table_name)
 
-    subscription_name = "group-subscription-topic"
+    subscription_name = "quotes"
 
     # CREATING SUBSCRIPTION
-    create_subscription(prj_name, subscription_name)
+    # create_subscription(prj_name, subscription_name)
 
     set_default_project(prj_name)
 

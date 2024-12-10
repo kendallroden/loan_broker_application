@@ -1,10 +1,11 @@
 import json
 
 import grpc
-from dapr.clients import DaprClient
 from fastapi import FastAPI, HTTPException
 import logging
 import os
+from dapr.clients import DaprClient
+from dapr.clients.grpc._response import TopicEventResponse
 from model.cloud_events import CloudEvent
 
 quote_aggregate_table = os.getenv('QUOTE_AGGREGATE_TABLE', '')

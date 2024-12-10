@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
 
-class CreditBureauModel(BaseModel):
+class CreditRequest(BaseModel):
     request_id: str
     SSN: str

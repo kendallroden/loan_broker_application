@@ -3,7 +3,7 @@ import random
 from fastapi import FastAPI
 
 import logging
-from model.bank_model import LoanRequestModel
+from model.bank_model import BankLoanRequest
 
 '''
     Each bank will vary its behavior by the following parameters:
@@ -27,10 +27,13 @@ def calculate_interest_rate(amount: int, score: int):
     if amount <= float(MAX_LOAN_AMOUNT) and score >= float(MIN_CREDIT_SCORE):
         return BASE_RATE + random.random() * ((1000 - score) / 100.0)
 
+@app.get("/")
+async def root():
+    return {"message": "Hello, World!"}
 
-@app.post('/loan/request')
-def bank_loan_request(loanRequest: LoanRequestModel):
-    logging.info(f"Titanium Trust Received loan request {loanRequest} for {BANK_ID}")
+@app.post('/loan-quote')
+def bank_loan_request(loanRequest: BankLoanRequest):
+    logging.info(f"Received loan request {loanRequest} for {BANK_ID}")
 
     rate = calculate_interest_rate(loanRequest.amount, loanRequest.credit.score)
 

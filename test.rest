@@ -1,0 +1,5 @@
+### Submit a simple order
+POST http://localhost:5006/loan-request
+Content-Type: application/json
+
+{"id": "2", "term": "20", "SSN": "645-42-9876", "amount": 20000}

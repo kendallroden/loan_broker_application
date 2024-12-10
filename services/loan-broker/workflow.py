@@ -10,18 +10,18 @@ import logging
 from typing import List
 from dapr.ext.workflow import DaprWorkflowContext, when_all
 
-from model.bank_model import LoanRequestModel, Credit
+from model.bank_model import BankLoanRequest, Credit
 
 logging.basicConfig(level=logging.INFO)
 
-union_vault_appid = os.getenv('UNION_VAULT_APP_ID', '')
-titanium_trust_appid = os.getenv('TITANIUM_TRUST_APP_ID', '')
-riverstone_bank_appid = os.getenv('RIVERSTONE_APP_ID', '')
+union_vault_appid = os.getenv('UNION_VAULT_APPID', 'union-vault')
+titanium_trust_appid = os.getenv('TITANIUM_TRUST_APPID', 'titanium-trust')
+riverstone_bank_appid = os.getenv('RIVERSTONE_APPID', 'riverstone-bank')
 
 dapr_http_endpoint = os.getenv('DAPR_HTTP_ENDPOINT', 'http://localhost')
 dapr_api_token = os.getenv('DAPR_API_TOKEN', '')
 pubsub_component = os.getenv('PUBSUB_COMPONENT', 'pubsub')
-subscription_topic = os.getenv('TOPIC_NAME', 'quotes')
+topic_name = os.getenv('TOPIC_NAME', 'quotes')
 
 
 def error_handler(ctx, error):
@@ -31,10 +31,8 @@ def error_handler(ctx, error):
 
 
 def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: {}):
-   
-    
-    logging.info(f'Loan broaker workflow started with instance id: {ctx.instance_id}')
-    logging.info(f'Workflow input: {wf_input}')
+    logging.info(f'Loan broker workflow started with instance id: {ctx.instance_id}')
+    logging.info(f'Request details: {wf_input}')
 
     # schedule tasks to process the calls to each provider 
     try:
@@ -58,14 +56,14 @@ def loan_broker_workflow(ctx: DaprWorkflowContext, wf_input: {}):
 
 def riverstone_bank_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
-    loan_req = CreditLoanRequest(amount=input['amount'], term=input['term'], credit=credit)
+    loan_req = BankLoanRequest(amount=input['amount'], term=input['term'], credit=credit)
 
     headers = {'dapr-app-id': riverstone_bank_appid, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
         result = requests.post(
-            url='%s/loan/request' % dapr_http_endpoint,
+            url='%s/loan-quote' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers
@@ -74,7 +72,7 @@ def riverstone_bank_quote(ctx, input: {}):
         if result.ok:
             logging.info('Invocation successful with status code: %s' %
                          result.json())
-            logging.info("result from riverstone bank is %s" % result.json())
+            logging.info("Result from riverstone bank is %s" % result.json())
 
             return result.json()
 
@@ -90,13 +88,13 @@ def riverstone_bank_quote(ctx, input: {}):
 
 def titanium_trust_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
-    loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
+    loan_req = BankLoanRequest(amount=input['amount'], term=input['term'], credit=credit)
     headers = {'dapr-app-id': titanium_trust_appid, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
         result = requests.post(
-            url='%s/loan/request' % dapr_http_endpoint,
+            url='%s/loan-quote' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers
@@ -105,7 +103,7 @@ def titanium_trust_quote(ctx, input: {}):
         if result.ok:
             logging.info('Invocation successful with status code: %s' %
                          result.json())
-            logging.info("result from titanium trust is %s" % result.json())
+            logging.info("Result from titanium trust is %s" % result.json())
 
             return result.json()
 
@@ -121,13 +119,13 @@ def titanium_trust_quote(ctx, input: {}):
 
 def union_vault_quote(ctx, input: {}):
     credit = Credit(score=input['score'])
-    loan_req = LoanRequestModel(amount=input['amount'], term=input['term'], credit=credit)
+    loan_req = BankLoanRequest(amount=input['amount'], term=input['term'], credit=credit)
     headers = {'dapr-app-id': union_vault_appid, 'dapr-api-token': dapr_api_token,
                'content-type': 'application/json'}
     # request/response
     try:
         result = requests.post(
-            url='%s/loan/request' % dapr_http_endpoint,
+            url='%s/loan-quote' % dapr_http_endpoint,
             json=loan_req.model_dump(),
 
             headers=headers
@@ -136,7 +134,7 @@ def union_vault_quote(ctx, input: {}):
         if result.ok:
             logging.info('Invocation successful with status code: %s' %
                          result.json())
-            logging.info("result from union vault is %s" % result.json())
+            logging.info("Result from union vault is %s" % result.json())
 
             return result.json()
 
@@ -160,8 +158,8 @@ def process_results(ctx, results: {}):
 
         # push aggregate results as an event to quote-aggregate
         d.publish_event(
-            pubsub_name=dapr_pubsub,
-            topic_name=dapr_subscription_topic,
+            pubsub_name=pubsub_component,
+            topic_name=topic_name,
             data=json.dumps(details),
             data_content_type='application/json',
         )

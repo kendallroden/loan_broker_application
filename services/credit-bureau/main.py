@@ -3,7 +3,7 @@ import re
 from fastapi import FastAPI, HTTPException
 import grpc
 import logging
-from model.credit_bureau_model import CreditBureauModel
+from model.credit_request import CreditRequest
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,9 +13,12 @@ def get_random_int(min_value, max_value):
 
 app = FastAPI()
 
+@app.get("/")
+async def root():
+    return {"message": "Hello, World!"}
 
 @app.post('/credit-score')
-def credit_bureau_service(cbModel: CreditBureauModel):
+def credit_bureau_service(cbModel: CreditRequest):
     
     min_score = 300
     max_score = 900
