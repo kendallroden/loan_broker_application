@@ -150,7 +150,7 @@ def union_vault_quote(ctx, input: {}):
 
 def process_results(ctx, results: {}):
     with DaprClient() as d:
-        logging.info('Processing results.%s', json.dumps(results))
+
         details = {
             "event_type": "quote-aggregate",
             "quote_aggregate": json.dumps(results)
@@ -163,5 +163,7 @@ def process_results(ctx, results: {}):
             data=json.dumps(details),
             data_content_type='application/json',
         )
+        
+        logging.info('Published results: %s', json.dumps(results))
 
         return "success"
