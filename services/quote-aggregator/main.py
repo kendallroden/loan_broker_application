@@ -14,15 +14,19 @@ app = FastAPI()
 
 logging.basicConfig(level=logging.INFO)
 
-async def main():
-    async with DaprClient() as client:
-    
-        subscription = await client.subscribe_with_handler(
+def main():
+    with DaprClient() as client:
+        close_fn = client.subscribe_with_handler(
                 pubsub_name='pubsub', topic='quotes', handler_fn=loan_quotes, dead_letter_topic='undeliverable')
-
-
-async def loan_quotes(event: CloudEvent) -> TopicEventResponse:
+    while True: 
+        time.sleep(1)
     
+    print('Closing subscription...')
+
+    close_fn()
+
+
+def loan_quotes(event: CloudEvent) -> TopicEventResponse:
     with DaprClient() as d:
         try:
 
@@ -43,4 +47,4 @@ async def loan_quotes(event: CloudEvent) -> TopicEventResponse:
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
