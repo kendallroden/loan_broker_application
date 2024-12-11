@@ -20,7 +20,7 @@ riverstone_bank_appid = os.getenv('RIVERSTONE_APPID', 'riverstone-bank')
 
 dapr_http_endpoint = os.getenv('DAPR_HTTP_ENDPOINT', 'http://localhost')
 dapr_api_token = os.getenv('DAPR_API_TOKEN', '')
-pubsub_component = os.getenv('PUBSUB_COMPONENT', 'pubsub')
+pubsub_component = os.getenv('PUBSUB_COMPONENT', 'aws-pubsub')
 topic_name = os.getenv('TOPIC_NAME', 'quotes')
 
 
