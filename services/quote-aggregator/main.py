@@ -8,23 +8,36 @@ from dapr.clients import DaprClient
 from dapr.clients.grpc._response import TopicEventResponse
 from model.cloud_events import CloudEvent
 
-quote_aggregate_table = os.getenv('QUOTE_AGGREGATE_TABLE', '')
+quote_aggregate_table = os.getenv('QUOTE_AGGREGATE_TABLE', 'kvstore')
 
 app = FastAPI()
 
 logging.basicConfig(level=logging.INFO)
 
-def main():
-    with DaprClient() as d:
-        close_fn = d.subscribe_with_handler(
-                pubsub_name='pubsub', topic='quotes', handler_fn=loan_quotes, dead_letter_topic='undeliverable')
-    while True: 
-        time.sleep(1)
-    
-    print('Closing subscription...')
+@app.get("/")
+async def root():
+    return {"message": "Hello, World!"}
 
-    close_fn()
+@app.on_event("startup")
+def init_sub():
+    with DaprClient() as client:
+        
+        print('attempting to start subscription...')
 
+        try:
+            close_fn = client.subscribe_with_handler(
+                    pubsub_name='pubsub', topic='quotes', handler_fn=loan_quotes, dead_letter_topic='undeliverable')
+        
+        except grpc.RpcError as err:
+                logging.info(f"Error={err}")
+                raise HTTPException(status_code=500, detail=err.details())
+        
+        while True: 
+            time.sleep(1)
+        
+        print('Closing subscription...')
+
+        close_fn()
 
 def loan_quotes(event: CloudEvent):
     with DaprClient() as d:
@@ -40,11 +53,31 @@ def loan_quotes(event: CloudEvent):
                          value=json.dumps(quote_aggregate),
                          state_metadata={"contentType": "application/json"})
 
+            return TopicEventResponse('success')
 
         except grpc.RpcError as err:
             logging.info(f"Error={err}")
             raise HTTPException(status_code=500, detail=err.details())
 
+# @app.post('/loan-quotes')
+# def loan_quotes(event: CloudEvent):
+#     with DaprClient() as d:
+#         try:
 
-if __name__ == '__main__':
-    main()
+#             logging.info(f'Received event: %s:' % {event.data["quote_aggregate"]})
+
+#             quote_aggregate = json.loads(event.data['quote_aggregate'])
+            
+#             # save aggregate data
+#             d.save_state(store_name=quote_aggregate_table,
+#                          key=str(quote_aggregate['request_id']),
+#                          value=json.dumps(quote_aggregate),
+#                          state_metadata={"contentType": "application/json"})
+
+
+#         except grpc.RpcError as err:
+#             logging.info(f"Error={err}")
+#             raise HTTPException(status_code=500, detail=err.details())
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=5002)
