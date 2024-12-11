@@ -1,0 +1,87 @@
+project: loan-broker
+apps:
+  - appId: credit-bureau
+    appPort: 5001
+    env:
+      DAPR_API_TOKEN: diagrid://v1/58e239cc-f716-48f2-bf5b-2a3a3154c51c/600156/loan-broker/credit-bureau/845a9aaa-0216-4255-b493-109ccfd9841c
+      DAPR_APP_ID: credit-bureau
+      DAPR_CLIENT_TIMEOUT_SECONDS: 10
+      DAPR_GRPC_ENDPOINT: https://grpc-prj600156.api.dev.cloud.diagrid.io:443
+      DAPR_HTTP_ENDPOINT: https://http-prj600156.api.dev.cloud.diagrid.io
+    workDir: ./services/credit-bureau
+    command:
+      - uvicorn
+      - main:app
+      - --port
+      - "5001"
+  - appId: loan-broker
+    appPort: 0
+    env:
+      DAPR_API_TOKEN: diagrid://v1/58e239cc-f716-48f2-bf5b-2a3a3154c51c/600156/loan-broker/loan-broker/4e146ddc-cd42-49c0-b192-fbb36d41e643
+      DAPR_APP_ID: loan-broker
+      DAPR_CLIENT_TIMEOUT_SECONDS: 10
+      DAPR_GRPC_ENDPOINT: https://grpc-prj600156.api.dev.cloud.diagrid.io:443
+      DAPR_HTTP_ENDPOINT: https://http-prj600156.api.dev.cloud.diagrid.io
+    workDir: ./services/loan-broker
+    command:
+      - uvicorn
+      - main:app
+      - --port
+      - "5006"
+  - appId: quote-aggregator
+    appPort: 5002
+    env:
+      DAPR_API_TOKEN: diagrid://v1/58e239cc-f716-48f2-bf5b-2a3a3154c51c/600156/loan-broker/quote-aggregator/0c9b24e5-addf-426f-bbcb-31e2bbdeebd3
+      DAPR_APP_ID: quote-aggregator
+      DAPR_CLIENT_TIMEOUT_SECONDS: 10
+      DAPR_GRPC_ENDPOINT: https://grpc-prj600156.api.dev.cloud.diagrid.io:443
+      DAPR_HTTP_ENDPOINT: https://http-prj600156.api.dev.cloud.diagrid.io
+    workDir: ./services/quote-aggregator
+    command:
+      - uvicorn
+      - main:app
+      - --port
+      - "5002"
+  - appId: riverstone-bank
+    appPort: 5003
+    env:
+      DAPR_API_TOKEN: diagrid://v1/58e239cc-f716-48f2-bf5b-2a3a3154c51c/600156/loan-broker/riverstone-bank/86016bc1-90ac-4dc5-b2ce-0a8315be5067
+      DAPR_APP_ID: riverstone-bank
+      DAPR_CLIENT_TIMEOUT_SECONDS: 10
+      DAPR_GRPC_ENDPOINT: https://grpc-prj600156.api.dev.cloud.diagrid.io:443
+      DAPR_HTTP_ENDPOINT: https://http-prj600156.api.dev.cloud.diagrid.io
+    workDir: ./services/riverstone-bank
+    command:
+      - uvicorn
+      - main:app
+      - --port
+      - "5003"
+  - appId: titanium-trust
+    appPort: 5004
+    env:
+      DAPR_API_TOKEN: diagrid://v1/58e239cc-f716-48f2-bf5b-2a3a3154c51c/600156/loan-broker/titanium-trust/428fc64a-8a88-4aa2-8079-3a85f6e65e2e
+      DAPR_APP_ID: titanium-trust
+      DAPR_CLIENT_TIMEOUT_SECONDS: 10
+      DAPR_GRPC_ENDPOINT: https://grpc-prj600156.api.dev.cloud.diagrid.io:443
+      DAPR_HTTP_ENDPOINT: https://http-prj600156.api.dev.cloud.diagrid.io
+    workDir: ./services/titanium-trust
+    command:
+      - uvicorn
+      - main:app
+      - --port
+      - "5004"
+  - appId: union-vault
+    appPort: 5005
+    env:
+      DAPR_API_TOKEN: diagrid://v1/58e239cc-f716-48f2-bf5b-2a3a3154c51c/600156/loan-broker/union-vault/d28e0830-76b6-42a4-b8f1-16f34e75cc08
+      DAPR_APP_ID: union-vault
+      DAPR_CLIENT_TIMEOUT_SECONDS: 10
+      DAPR_GRPC_ENDPOINT: https://grpc-prj600156.api.dev.cloud.diagrid.io:443
+      DAPR_HTTP_ENDPOINT: https://http-prj600156.api.dev.cloud.diagrid.io
+    workDir: ./services/union-vault
+    command:
+      - uvicorn
+      - main:app
+      - --port
+      - "5005"
+appLogDestination: ""

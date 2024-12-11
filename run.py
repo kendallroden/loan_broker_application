@@ -13,7 +13,7 @@ https://www.python.org/downloads/
 
 services_dir = 'services'
 
-group_subs_file_path = os.path.join(os.path.dirname(__file__), 'group_subs.yaml')
+# group_subs_file_path = os.path.join(os.path.dirname(__file__), 'group_subs.yaml')
 
 
 def error(spinner, message):
@@ -58,7 +58,7 @@ def check_python_installed():
 def create_project(project_name):
     with yaspin(text=f"Creating project {project_name}...") as spinner:
         try:
-            run_command(f"diagrid project create {project_name} --deploy-managed-kv --deploy-managed-pubsub", check=True)
+            run_command(f"diagrid project create {project_name} --deploy-managed-kv --deploy-managed-pubsub --enable-managed-workflow", check=True)
             spinner.ok("✅")
         except subprocess.CalledProcessError as e:
             spinner.fail("❌")
@@ -251,7 +251,7 @@ def main():
 
     service_name_list: [] = retrieve_folder_names()
 
-    # CREATE APP IDS
+    #CREATE APP IDS
     for service_name in service_name_list:
         create_appid(prj_name, service_name)
 
@@ -260,7 +260,7 @@ def main():
     #     print(f"folder name is {service_name}")
     #     create_dynamodb_table(f"{service_name}-table")
 
-    for service_name in service_name_list:
+    #for service_name in service_name_list:
         check_appid_status(project_name, service_name)
 
     # CREATE PUBSUB COMPONENT
