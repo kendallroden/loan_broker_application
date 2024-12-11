@@ -37,17 +37,10 @@ def init_sub():
         except grpc.RpcError as err:
                 logging.info(f"Error={err}")
                 raise HTTPException(status_code=500, detail=err.details())
-        
-        while True:
-            time.sleep(1)
-        
-        logging.info('Closing subscription...')
-        close_fn()
 
 def shutdown_sub_stream(): 
-    with DaprClient() as d:
-        logging.info('Closing subscription on shutdown...')
-        close_fn()
+    logging.info('Closing subscription on shutdown...')
+    app.state.close_fn_handler()
 
 @app.get("/")
 async def root():
