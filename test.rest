@@ -2,4 +2,4 @@
 POST http://localhost:5006/loan-request
 Content-Type: application/json
 
-{"id": "10", "term": "20", "SSN": "742-52-9370", "amount": 400000}
+{"id": "1", "term": "25", "SSN": "742-52-9370", "amount": 100}
