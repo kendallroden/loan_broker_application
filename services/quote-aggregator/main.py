@@ -54,6 +54,10 @@ def loan_quotes(event: CloudEvent):
 
 # app = FastAPI(lifespan=lifespan)
 
+# @app.get("/")
+# async def healthz():
+#     return {"message": "Hello, World!"}
+
 # # Streaming subscription
 # def init_sub():
 #     with DaprClient() as d:
@@ -72,16 +76,29 @@ def loan_quotes(event: CloudEvent):
 #                 logging.info(f"Error={err}")
 #                 raise HTTPException(status_code=500, detail=err.details())
 
+#         while True:
+#             time.sleep(1)
+
 # def shutdown_sub_stream(): 
 #     logging.info('Closing subscription...')
 #     app.state.close_fn_handler()
 
 # def loan_quotes(event):
+#     logging.info(f"Received event from {event.source()} which was published on {event.pubsub_name()} topic {event.topic()}: {event.data()}")
+
 #     with DaprClient() as d:
 #         try:
-#             logging.info(f"Received event from {event._source} which was published on {event._pubsub_name} topic {event._topic}")
+#             # logging.info(f"Received event from {event._source} which was published on {event._pubsub_name} topic {event._topic}: {event._data}")
 
-#             quote_aggregate = json.loads(event._data['quote_aggregate'])
+#             # ignore malformed events
+#             if event.data() is None:
+#                 logging.info(f"Event data is None, ignoring...")
+#                 return TopicEventResponse('success')
+
+#             quote_aggregate = event.data()
+#             if not "request_id" in quote_aggregate:
+#                 logging.info(f"Event data does not contain request_id, ignoring...")
+#                 return TopicEventResponse('success')
 
 #             logging.info(f"Event contained aggregated quote with details: {quote_aggregate}")
             
